@@ -1492,13 +1492,12 @@ var LibraryGL = {
   $emscriptenWebGLGetTexPixelData: function(type, format, width, height, pixels, internalFormat) {
     var heap = heapObjectForWebGLType(type);
     var shift = heapAccessShiftForWebGLHeap(heap);
-    var byteSize = 1<<shift;
-    var sizePerPixel = __colorChannelsInGlTextureFormat(format) * byteSize;
-    var bytes = computeUnpackAlignedImageSize(width, height, sizePerPixel, GL.unpackAlignment);
+    var sizePerPixel = __colorChannelsInGlTextureFormat(format) << shift;
+    var bytes = {{{ createHeapIdx('computeUnpackAlignedImageSize(width, height, sizePerPixel, GL.unpackAlignment)') }}};
 #if GL_ASSERTIONS
-    assert((pixels >> shift) << shift == pixels, 'Pointer to texture data passed to texture get function must be aligned to the byte size of the pixel type!');
+    assert({{{ isPtrAligned('pixels', '(1 << shift)') }}}, 'Pointer to texture data passed to texture get function must be aligned to the byte size of the pixel type!');
 #endif
-    return heap.subarray(pixels >> shift, pixels + bytes >> shift);
+    return heap.subarray({{{ ptrToIdx('pixels', 'shift') }}}, {{{ ptrToIdx('pixels + bytes', 'shift') }}});
   },
 
   glTexImage2D__sig: 'viiiiiiiii',
@@ -1533,7 +1532,7 @@ var LibraryGL = {
         GLctx.texImage2D(target, level, internalFormat, width, height, border, format, type, pixels);
       } else if (pixels) {
         var heap = heapObjectForWebGLType(type);
-        GLctx.texImage2D(target, level, internalFormat, width, height, border, format, type, heap, pixels >> heapAccessShiftForWebGLHeap(heap));
+        GLctx.texImage2D(target, level, internalFormat, width, height, border, format, type, heap, {{{ idxToMemory53(ptrToIdx('pixels', 'heapAccessShiftForWebGLHeap(heap)')) }}});
       } else {
         GLctx.texImage2D(target, level, internalFormat, width, height, border, format, type, null);
       }
@@ -1565,7 +1564,7 @@ var LibraryGL = {
         GLctx.texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
       } else if (pixels) {
         var heap = heapObjectForWebGLType(type);
-        GLctx.texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, heap, pixels >> heapAccessShiftForWebGLHeap(heap));
+        GLctx.texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, heap, {{{ idxToMemory53(ptrToIdx('pixels', 'heapAccessShiftForWebGLHeap(heap)')) }}});
       } else {
         GLctx.texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, null);
       }
@@ -1590,7 +1589,7 @@ var LibraryGL = {
         GLctx.readPixels(x, y, width, height, format, type, pixels);
       } else {
         var heap = heapObjectForWebGLType(type);
-        GLctx.readPixels(x, y, width, height, format, type, heap, pixels >> heapAccessShiftForWebGLHeap(heap));
+        GLctx.readPixels(x, y, width, height, format, type, heap, {{{ idxToMemory53(ptrToIdx('pixels', 'heapAccessShiftForWebGLHeap(heap)')) }}});
       }
       return;
     }
@@ -2344,19 +2343,19 @@ var LibraryGL = {
   glUniform1iv: function(location, count, value) {
 #if GL_ASSERTIONS
     GL.validateGLObjectID(GLctx.currentProgram.uniformLocsById, location, 'glUniform1iv', 'location');
-    assert((value & 3) == 0, 'Pointer to integer data passed to glUniform1iv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('value', 4) }}}, 'Pointer to integer data passed to glUniform1iv must be aligned to four bytes!');
 #endif
 
 #if MIN_WEBGL_VERSION >= 2
 #if GL_ASSERTIONS
     assert(GL.currentContext.version >= 2);
 #endif
-    GLctx.uniform1iv(webglGetUniformLocation(location), HEAP32, value>>2, count);
+    GLctx.uniform1iv(webglGetUniformLocation(location), HEAP32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count);
 #else
 
 #if MAX_WEBGL_VERSION >= 2
     if ({{{ isCurrentContextWebGL2() }}}) { // WebGL 2 provides new garbage-free entry points to call to WebGL. Use those always when possible.
-      GLctx.uniform1iv(webglGetUniformLocation(location), HEAP32, value>>2, count);
+      GLctx.uniform1iv(webglGetUniformLocation(location), HEAP32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count);
       return;
     }
 #endif
@@ -2389,19 +2388,19 @@ var LibraryGL = {
   glUniform2iv: function(location, count, value) {
 #if GL_ASSERTIONS
     GL.validateGLObjectID(GLctx.currentProgram.uniformLocsById, location, 'glUniform2iv', 'location');
-    assert((value & 3) == 0, 'Pointer to integer data passed to glUniform2iv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('value', 4) }}}, 'Pointer to integer data passed to glUniform2iv must be aligned to four bytes!');
 #endif
 
 #if MIN_WEBGL_VERSION >= 2
 #if GL_ASSERTIONS
     assert(GL.currentContext.version >= 2);
 #endif
-    GLctx.uniform2iv(webglGetUniformLocation(location), HEAP32, value>>2, count*2);
+    GLctx.uniform2iv(webglGetUniformLocation(location), HEAP32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*2);
 #else
 
 #if MAX_WEBGL_VERSION >= 2
     if ({{{ isCurrentContextWebGL2() }}}) { // WebGL 2 provides new garbage-free entry points to call to WebGL. Use those always when possible.
-      GLctx.uniform2iv(webglGetUniformLocation(location), HEAP32, value>>2, count*2);
+      GLctx.uniform2iv(webglGetUniformLocation(location), HEAP32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*2);
       return;
     }
 #endif
@@ -2435,19 +2434,19 @@ var LibraryGL = {
   glUniform3iv: function(location, count, value) {
 #if GL_ASSERTIONS
     GL.validateGLObjectID(GLctx.currentProgram.uniformLocsById, location, 'glUniform3iv', 'location');
-    assert((value & 3) == 0, 'Pointer to integer data passed to glUniform3iv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('value', 4) }}}, 'Pointer to integer data passed to glUniform3iv must be aligned to four bytes!');
 #endif
 
 #if MIN_WEBGL_VERSION >= 2
 #if GL_ASSERTIONS
     assert(GL.currentContext.version >= 2);
 #endif
-    GLctx.uniform3iv(webglGetUniformLocation(location), HEAP32, value>>2, count*3);
+    GLctx.uniform3iv(webglGetUniformLocation(location), HEAP32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*3);
 #else
 
 #if MAX_WEBGL_VERSION >= 2
     if ({{{ isCurrentContextWebGL2() }}}) { // WebGL 2 provides new garbage-free entry points to call to WebGL. Use those always when possible.
-      GLctx.uniform3iv(webglGetUniformLocation(location), HEAP32, value>>2, count*3);
+      GLctx.uniform3iv(webglGetUniformLocation(location), HEAP32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*3);
       return;
     }
 #endif
@@ -2482,19 +2481,19 @@ var LibraryGL = {
   glUniform4iv: function(location, count, value) {
 #if GL_ASSERTIONS
     GL.validateGLObjectID(GLctx.currentProgram.uniformLocsById, location, 'glUniform4iv', 'location');
-    assert((value & 3) == 0, 'Pointer to integer data passed to glUniform4iv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('value', 4) }}}, 'Pointer to integer data passed to glUniform4iv must be aligned to four bytes!');
 #endif
 
 #if MIN_WEBGL_VERSION >= 2
 #if GL_ASSERTIONS
     assert(GL.currentContext.version >= 2);
 #endif
-    GLctx.uniform4iv(webglGetUniformLocation(location), HEAP32, value>>2, count*4);
+    GLctx.uniform4iv(webglGetUniformLocation(location), HEAP32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*4);
 #else
 
 #if MAX_WEBGL_VERSION >= 2
     if ({{{ isCurrentContextWebGL2() }}}) { // WebGL 2 provides new garbage-free entry points to call to WebGL. Use those always when possible.
-      GLctx.uniform4iv(webglGetUniformLocation(location), HEAP32, value>>2, count*4);
+      GLctx.uniform4iv(webglGetUniformLocation(location), HEAP32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*4);
       return;
     }
 #endif
@@ -2530,19 +2529,19 @@ var LibraryGL = {
   glUniform1fv: function(location, count, value) {
 #if GL_ASSERTIONS
     GL.validateGLObjectID(GLctx.currentProgram.uniformLocsById, location, 'glUniform1fv', 'location');
-    assert((value & 3) == 0, 'Pointer to float data passed to glUniform1fv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('value', 4) }}}, 'Pointer to float data passed to glUniform1fv must be aligned to four bytes!');
 #endif
 
 #if MIN_WEBGL_VERSION >= 2
 #if GL_ASSERTIONS
     assert(GL.currentContext.version >= 2);
 #endif
-    GLctx.uniform1fv(webglGetUniformLocation(location), HEAPF32, value>>2, count);
+    GLctx.uniform1fv(webglGetUniformLocation(location), HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count);
 #else
 
 #if MAX_WEBGL_VERSION >= 2
     if ({{{ isCurrentContextWebGL2() }}}) { // WebGL 2 provides new garbage-free entry points to call to WebGL. Use those always when possible.
-      GLctx.uniform1fv(webglGetUniformLocation(location), HEAPF32, value>>2, count);
+      GLctx.uniform1fv(webglGetUniformLocation(location), HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count);
       return;
     }
 #endif
@@ -2575,19 +2574,19 @@ var LibraryGL = {
   glUniform2fv: function(location, count, value) {
 #if GL_ASSERTIONS
     GL.validateGLObjectID(GLctx.currentProgram.uniformLocsById, location, 'glUniform2fv', 'location');
-    assert((value & 3) == 0, 'Pointer to float data passed to glUniform2fv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('value', 4) }}}, 'Pointer to float data passed to glUniform2fv must be aligned to four bytes!');
 #endif
 
 #if MIN_WEBGL_VERSION >= 2
 #if GL_ASSERTIONS
     assert(GL.currentContext.version >= 2);
 #endif
-    GLctx.uniform2fv(webglGetUniformLocation(location), HEAPF32, value>>2, count*2);
+    GLctx.uniform2fv(webglGetUniformLocation(location), HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*2);
 #else
 
 #if MAX_WEBGL_VERSION >= 2
     if ({{{ isCurrentContextWebGL2() }}}) { // WebGL 2 provides new garbage-free entry points to call to WebGL. Use those always when possible.
-      GLctx.uniform2fv(webglGetUniformLocation(location), HEAPF32, value>>2, count*2);
+      GLctx.uniform2fv(webglGetUniformLocation(location), HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*2);
       return;
     }
 #endif
@@ -2621,19 +2620,19 @@ var LibraryGL = {
   glUniform3fv: function(location, count, value) {
 #if GL_ASSERTIONS
     GL.validateGLObjectID(GLctx.currentProgram.uniformLocsById, location, 'glUniform3fv', 'location');
-    assert((value & 3) == 0, 'Pointer to float data passed to glUniform3fv must be aligned to four bytes!' + value);
+    assert({{{ isPtrAligned('value', 4) }}}, 'Pointer to float data passed to glUniform3fv must be aligned to four bytes!');
 #endif
 
 #if MIN_WEBGL_VERSION >= 2
 #if GL_ASSERTIONS
     assert(GL.currentContext.version >= 2);
 #endif
-    GLctx.uniform3fv(webglGetUniformLocation(location), HEAPF32, value>>2, count*3);
+    GLctx.uniform3fv(webglGetUniformLocation(location), HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*3);
 #else
 
 #if MAX_WEBGL_VERSION >= 2
     if ({{{ isCurrentContextWebGL2() }}}) { // WebGL 2 provides new garbage-free entry points to call to WebGL. Use those always when possible.
-      GLctx.uniform3fv(webglGetUniformLocation(location), HEAPF32, value>>2, count*3);
+      GLctx.uniform3fv(webglGetUniformLocation(location), HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*3);
       return;
     }
 #endif
@@ -2668,19 +2667,19 @@ var LibraryGL = {
   glUniform4fv: function(location, count, value) {
 #if GL_ASSERTIONS
     GL.validateGLObjectID(GLctx.currentProgram.uniformLocsById, location, 'glUniform4fv', 'location');
-    assert((value & 3) == 0, 'Pointer to float data passed to glUniform4fv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('value', 4) }}}, 'Pointer to float data passed to glUniform4fv must be aligned to four bytes!');
 #endif
 
 #if MIN_WEBGL_VERSION >= 2
 #if GL_ASSERTIONS
     assert(GL.currentContext.version >= 2);
 #endif
-    GLctx.uniform4fv(webglGetUniformLocation(location), HEAPF32, value>>2, count*4);
+    GLctx.uniform4fv(webglGetUniformLocation(location), HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*4);
 #else
 
 #if MAX_WEBGL_VERSION >= 2
     if ({{{ isCurrentContextWebGL2() }}}) { // WebGL 2 provides new garbage-free entry points to call to WebGL. Use those always when possible.
-      GLctx.uniform4fv(webglGetUniformLocation(location), HEAPF32, value>>2, count*4);
+      GLctx.uniform4fv(webglGetUniformLocation(location), HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*4);
       return;
     }
 #endif
@@ -2689,15 +2688,14 @@ var LibraryGL = {
     if (count <= {{{ GL_POOL_TEMP_BUFFERS_SIZE / 4 }}}) {
       // avoid allocation when uploading few enough uniforms
       var view = miniTempWebGLFloatBuffers[4*count-1];
-      // hoist the heap out of the loop for size and for pthreads+growth.
+      // hoist the heap out of the loop for pthreads+growth.
       var heap = HEAPF32;
-      value >>= 2;
+      {{{ convertPtrToIdx('value', 2) }}};
       for (var i = 0; i < 4 * count; i += 4) {
-        var dst = value + i;
-        view[i] = heap[dst];
-        view[i + 1] = heap[dst + 1];
-        view[i + 2] = heap[dst + 2];
-        view[i + 3] = heap[dst + 3];
+        view[i] = heap[value++];
+        view[i + 1] = heap[value++];
+        view[i + 2] = heap[value++];
+        view[i + 3] = heap[value++];
       }
     } else
 #endif
@@ -2720,19 +2718,19 @@ var LibraryGL = {
   glUniformMatrix2fv: function(location, count, transpose, value) {
 #if GL_ASSERTIONS
     GL.validateGLObjectID(GLctx.currentProgram.uniformLocsById, location, 'glUniformMatrix2fv', 'location');
-    assert((value & 3) == 0, 'Pointer to float data passed to glUniformMatrix2fv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('value', 4) }}}, 'Pointer to float data passed to glUniformMatrix2fv must be aligned to four bytes!');
 #endif
 
 #if MIN_WEBGL_VERSION >= 2
 #if GL_ASSERTIONS
     assert(GL.currentContext.version >= 2);
 #endif
-    GLctx.uniformMatrix2fv(webglGetUniformLocation(location), !!transpose, HEAPF32, value>>2, count*4);
+    GLctx.uniformMatrix2fv(webglGetUniformLocation(location), !!transpose, HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*4);
 #else
 
 #if MAX_WEBGL_VERSION >= 2
     if ({{{ isCurrentContextWebGL2() }}}) { // WebGL 2 provides new garbage-free entry points to call to WebGL. Use those always when possible.
-      GLctx.uniformMatrix2fv(webglGetUniformLocation(location), !!transpose, HEAPF32, value>>2, count*4);
+      GLctx.uniformMatrix2fv(webglGetUniformLocation(location), !!transpose, HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*4);
       return;
     }
 #endif
@@ -2768,19 +2766,19 @@ var LibraryGL = {
   glUniformMatrix3fv: function(location, count, transpose, value) {
 #if GL_ASSERTIONS
     GL.validateGLObjectID(GLctx.currentProgram.uniformLocsById, location, 'glUniformMatrix3fv', 'location');
-    assert((value & 3) == 0, 'Pointer to float data passed to glUniformMatrix3fv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('value', 4) }}}, 'Pointer to float data passed to glUniformMatrix3fv must be aligned to four bytes!');
 #endif
 
 #if MIN_WEBGL_VERSION >= 2
 #if GL_ASSERTIONS
     assert(GL.currentContext.version >= 2);
 #endif
-    GLctx.uniformMatrix3fv(webglGetUniformLocation(location), !!transpose, HEAPF32, value>>2, count*9);
+    GLctx.uniformMatrix3fv(webglGetUniformLocation(location), !!transpose, HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*9);
 #else
 
 #if MAX_WEBGL_VERSION >= 2
     if ({{{ isCurrentContextWebGL2() }}}) { // WebGL 2 provides new garbage-free entry points to call to WebGL. Use those always when possible.
-      GLctx.uniformMatrix3fv(webglGetUniformLocation(location), !!transpose, HEAPF32, value>>2, count*9);
+      GLctx.uniformMatrix3fv(webglGetUniformLocation(location), !!transpose, HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*9);
       return;
     }
 #endif
@@ -2821,19 +2819,19 @@ var LibraryGL = {
   glUniformMatrix4fv: function(location, count, transpose, value) {
 #if GL_ASSERTIONS
     GL.validateGLObjectID(GLctx.currentProgram.uniformLocsById, location, 'glUniformMatrix4fv', 'location');
-    assert((value & 3) == 0, 'Pointer to float data passed to glUniformMatrix4fv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('value', 4) }}}, 'Pointer to float data passed to glUniformMatrix4fv must be aligned to four bytes!');
 #endif
 
 #if MIN_WEBGL_VERSION >= 2
 #if GL_ASSERTIONS
     assert(GL.currentContext.version >= 2);
 #endif
-    GLctx.uniformMatrix4fv(webglGetUniformLocation(location), !!transpose, HEAPF32, value>>2, count*16);
+    GLctx.uniformMatrix4fv(webglGetUniformLocation(location), !!transpose, HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*16);
 #else
 
 #if MAX_WEBGL_VERSION >= 2
     if ({{{ isCurrentContextWebGL2() }}}) { // WebGL 2 provides new garbage-free entry points to call to WebGL. Use those always when possible.
-      GLctx.uniformMatrix4fv(webglGetUniformLocation(location), !!transpose, HEAPF32, value>>2, count*16);
+      GLctx.uniformMatrix4fv(webglGetUniformLocation(location), !!transpose, HEAPF32, {{{ idxToMemory53(ptrToIdx('value', 2)) }}}, count*16);
       return;
     }
 #endif
@@ -2842,27 +2840,26 @@ var LibraryGL = {
     if (count <= {{{ GL_POOL_TEMP_BUFFERS_SIZE / 16 }}}) {
       // avoid allocation when uploading few enough uniforms
       var view = miniTempWebGLFloatBuffers[16*count-1];
-      // hoist the heap out of the loop for size and for pthreads+growth.
+      // hoist the heap out of the loop for pthreads+growth.
       var heap = HEAPF32;
-      value >>= 2;
+      {{{ convertPtrToIdx('value', 2) }}};
       for (var i = 0; i < 16 * count; i += 16) {
-        var dst = value + i;
-        view[i] = heap[dst];
-        view[i + 1] = heap[dst + 1];
-        view[i + 2] = heap[dst + 2];
-        view[i + 3] = heap[dst + 3];
-        view[i + 4] = heap[dst + 4];
-        view[i + 5] = heap[dst + 5];
-        view[i + 6] = heap[dst + 6];
-        view[i + 7] = heap[dst + 7];
-        view[i + 8] = heap[dst + 8];
-        view[i + 9] = heap[dst + 9];
-        view[i + 10] = heap[dst + 10];
-        view[i + 11] = heap[dst + 11];
-        view[i + 12] = heap[dst + 12];
-        view[i + 13] = heap[dst + 13];
-        view[i + 14] = heap[dst + 14];
-        view[i + 15] = heap[dst + 15];
+        view[i] = heap[value++];
+        view[i + 1] = heap[value++];
+        view[i + 2] = heap[value++];
+        view[i + 3] = heap[value++];
+        view[i + 4] = heap[value++];
+        view[i + 5] = heap[value++];
+        view[i + 6] = heap[value++];
+        view[i + 7] = heap[value++];
+        view[i + 8] = heap[value++];
+        view[i + 9] = heap[value++];
+        view[i + 10] = heap[value++];
+        view[i + 11] = heap[value++];
+        view[i + 12] = heap[value++];
+        view[i + 13] = heap[value++];
+        view[i + 14] = heap[value++];
+        view[i + 15] = heap[value++];
       }
     } else
 #endif
@@ -2913,41 +2910,43 @@ var LibraryGL = {
   glVertexAttrib1fv__sig: 'vii',
   glVertexAttrib1fv: function(index, v) {
 #if GL_ASSERTIONS
-    assert((v & 3) == 0, 'Pointer to float data passed to glVertexAttrib1fv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('v', 4) }}}, 'Pointer to float data passed to glVertexAttrib1fv must be aligned to four bytes!');
     assert(v != 0, 'Null pointer passed to glVertexAttrib1fv!');
 #endif
 
-    GLctx.vertexAttrib1f(index, HEAPF32[v>>2]);
+    GLctx.vertexAttrib1f(index, HEAPF32[{{{ ptrToIdx('v', 2) }}}]);
   },
 
   glVertexAttrib2fv__sig: 'vii',
   glVertexAttrib2fv: function(index, v) {
 #if GL_ASSERTIONS
-    assert((v & 3) == 0, 'Pointer to float data passed to glVertexAttrib2fv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('v', 4) }}}, 'Pointer to float data passed to glVertexAttrib2fv must be aligned to four bytes!');
     assert(v != 0, 'Null pointer passed to glVertexAttrib2fv!');
 #endif
 
-    GLctx.vertexAttrib2f(index, HEAPF32[v>>2], HEAPF32[v+4>>2]);
+    {{{ convertPtrToIdx('v', 2) }}};
+    GLctx.vertexAttrib2f(index, HEAPF32[v++], HEAPF32[v]);
   },
 
   glVertexAttrib3fv__sig: 'vii',
   glVertexAttrib3fv: function(index, v) {
 #if GL_ASSERTIONS
-    assert((v & 3) == 0, 'Pointer to float data passed to glVertexAttrib3fv must be aligned to four bytes!');
+    assert({{{ isPtrAligned('v', 4) }}}, 'Pointer to float data passed to glVertexAttrib3fv must be aligned to four bytes!');
     assert(v != 0, 'Null pointer passed to glVertexAttrib3fv!');
 #endif
 
-    GLctx.vertexAttrib3f(index, HEAPF32[v>>2], HEAPF32[v+4>>2], HEAPF32[v+8>>2]);
+    {{{ convertPtrToIdx('v', 2) }}};
+    GLctx.vertexAttrib3f(index, HEAPF32[v++], HEAPF32[v++], HEAPF32[v]);
   },
 
   glVertexAttrib4fv__sig: 'vii',
   glVertexAttrib4fv: function(index, v) {
 #if GL_ASSERTIONS
-    assert((v & 3) == 0, 'Pointer to float data passed to glVertexAttrib4fv must be aligned to four bytes!');
     assert(v != 0, 'Null pointer passed to glVertexAttrib4fv!');
 #endif
 
-    GLctx.vertexAttrib4f(index, HEAPF32[v>>2], HEAPF32[v+4>>2], HEAPF32[v+8>>2], HEAPF32[v+12>>2]);
+    {{{ convertPtrToIdx('v', 2) }}};
+    GLctx.vertexAttrib4f(index, HEAPF32[v++], HEAPF32[v++], HEAPF32[v++], HEAPF32[v]);
   },
 
   glGetAttribLocation__sig: 'iii',
@@ -3915,9 +3914,9 @@ var LibraryGL = {
     GLctx.multiDrawWebgl['multiDrawArraysWEBGL'](
       mode,
       HEAP32,
-      firsts >> 2,
+      {{{ idxToMemory53(ptrToIdx('firsts', 2)) }}},
       HEAP32,
-      counts >> 2,
+      {{{ idxToMemory53(ptrToIdx('counts', 2)) }}},
       drawcount);
   },
 
@@ -3927,11 +3926,11 @@ var LibraryGL = {
     GLctx.multiDrawWebgl['multiDrawArraysInstancedWEBGL'](
       mode,
       HEAP32,
-      firsts >> 2,
+      {{{ idxToMemory53(ptrToIdx('firsts', 2)) }}},
       HEAP32,
-      counts >> 2,
+      {{{ idxToMemory53(ptrToIdx('counts', 2)) }}},
       HEAP32,
-      instanceCounts >> 2,
+      {{{ idxToMemory53(ptrToIdx('instanceCounts', 2)) }}},
       drawcount);
   },
 
@@ -3942,10 +3941,10 @@ var LibraryGL = {
     GLctx.multiDrawWebgl['multiDrawElementsWEBGL'](
       mode,
       HEAP32,
-      counts >> 2,
+      {{{ idxToMemory53(ptrToIdx('counts', 2)) }}},
       type,
       HEAP32,
-      offsets >> 2,
+      {{{ idxToMemory53(ptrToIdx('offsets', 2)) }}},
       drawcount);
   },
 
@@ -3955,12 +3954,12 @@ var LibraryGL = {
     GLctx.multiDrawWebgl['multiDrawElementsInstancedWEBGL'](
       mode,
       HEAP32,
-      counts >> 2,
+      {{{ idxToMemory53(ptrToIdx('counts', 2)) }}},
       type,
       HEAP32,
-      offsets >> 2,
+      {{{ idxToMemory53(ptrToIdx('offsets', 2)) }}},
       HEAP32,
-      instanceCounts >> 2,
+      {{{ idxToMemory53(ptrToIdx('instanceCounts', 2)) }}},
       drawcount);
   },
 
