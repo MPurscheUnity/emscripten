@@ -1354,8 +1354,11 @@ function convertPtrToIdx(ptr, accessWidth) {
 
   let conversion;
   if (MEMORY64) {
-    if (MAXIMUM_MEMORY > MAX_MEMORY53) conversion = /^\d+$/.test(accessWidth) ? `${ptr} >>= ${accessWidth}n` : `${ptr} >>= BigInt(${accessWidth})`;
-    else conversion = `${ptr} = Number(${ptr}) / ${accessWidth}`;
+    if (MAXIMUM_MEMORY > MAX_MEMORY53) {
+      conversion = /^\d+$/.test(accessWidth) ? `${ptr} >>= ${accessWidth}n` : `${ptr} >>= BigInt(${accessWidth})`;
+    } else {
+      conversion = `${ptr} = Number(${ptr}) / ${accessWidth}`;
+    }
   } else if (MAXIMUM_MEMORY > 2 * 1024 * 1024 * 1024) {
     conversion = `${ptr} >>>= ${accessWidth}`;
   } else {
