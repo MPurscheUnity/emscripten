@@ -22,10 +22,10 @@ extern "C" {
 // pthread_create(), and the compiled page was built with threading support
 // enabled. If this returns 0, calls to pthread_create() will fail with return
 // code EAGAIN.
-int emscripten_has_threading_support(void);
+int emscripten_has_threading_support(void) __attribute__((const));
 
 // Returns the number of logical cores on the system.
-int emscripten_num_logical_cores(void);
+int emscripten_num_logical_cores(void) __attribute__((pure));
 
 // Configures the number of logical cores on the system. This can be called at
 // startup to specify the number of cores emscripten_num_logical_cores()
@@ -230,10 +230,10 @@ int emscripten_dispatch_to_thread_async_(pthread_t target_thread,
     (target_thread), (sig), (void*)(func_ptr), (satellite), ##__VA_ARGS__)
 
 // Returns 1 if the current thread is the thread that hosts the Emscripten runtime.
-int emscripten_is_main_runtime_thread(void);
+int emscripten_is_main_runtime_thread(void) __attribute__((const));
 
 // Returns 1 if the current thread is the main browser thread.
-int emscripten_is_main_browser_thread(void);
+int emscripten_is_main_browser_thread(void) __attribute__((const));
 
 // A temporary workaround to issue
 // https://github.com/emscripten-core/emscripten/issues/3495:
@@ -284,7 +284,7 @@ int emscripten_pthread_attr_settransferredcanvases(pthread_attr_t *a, const char
 
 // Called when blocking on the main thread. This will error if main thread
 // blocking is not enabled, see ALLOW_BLOCKING_ON_MAIN_THREAD.
-void emscripten_check_blocking_allowed(void);
+void emscripten_check_blocking_allowed(void) __attribute__((const));
 
 // Experimental API for syncing loaded code between pthreads.
 void _emscripten_thread_sync_code();

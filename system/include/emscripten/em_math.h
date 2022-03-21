@@ -49,33 +49,33 @@ extern "C" {
 // The following Math operations do not have native WebAssembly opcodes, and
 // are provided here as small sized alternatives to their libc counterparts.
 
-double emscripten_math_acos(double x); // acos() in math.h
-double emscripten_math_acosh(double x); // acosh() in math.h
-double emscripten_math_asin(double x); // asin() in math.h
-double emscripten_math_asinh(double x); // asinh() in math.h
-double emscripten_math_atan(double x); // atan() in math.h
-double emscripten_math_atan2(double y, double x); // atan2() in math.h
-double emscripten_math_atanh(double x); // atanh() in math.h
-double emscripten_math_cbrt(double x); // cbrt() in math.h
-double emscripten_math_cos(double x); // cos() in math.h
-double emscripten_math_cosh(double x); // cosh() in math.h
-double emscripten_math_exp(double x); // exp() in math.h
-double emscripten_math_expm1(double x); // expm1() in math.h
-double emscripten_math_fmod(double x, double y); // fmod() in math.h, not a function on Math, but calls JS "x % y" operator.
-double emscripten_math_hypot(int count, ...);  // hypot() in math.h (although only for fixed 2 arguments)
-double emscripten_math_log(double x); // log() in math.h
-double emscripten_math_log1p(double x); // log1p() in math.h
-double emscripten_math_log10(double x); // log10() in math.h
-double emscripten_math_log2(double x); // log2() in math.h
-double emscripten_math_pow(double x, double y); // pow(x, y) in math.h
-double emscripten_math_random(void); // N.b. emscripten_random() in emscripten.h returns a single-precision float!
-double emscripten_math_round(double x); // round() in math.h
-double emscripten_math_sign(double x); // No equivalent in libc
-double emscripten_math_sin(double x); // sin() in math.h
-double emscripten_math_sinh(double x); // sinh() in math.h
-double emscripten_math_sqrt(double x); // sqrt() in math.h
-double emscripten_math_tan(double x); // tan() in math.h
-double emscripten_math_tanh(double x); // tanh() in math.h
+double emscripten_math_acos(double x) __attribute__((const)); // acos() in math.h
+double emscripten_math_acosh(double x) __attribute__((const)); // acosh() in math.h
+double emscripten_math_asin(double x) __attribute__((const)); // asin() in math.h
+double emscripten_math_asinh(double x) __attribute__((const)); // asinh() in math.h
+double emscripten_math_atan(double x) __attribute__((const)); // atan() in math.h
+double emscripten_math_atan2(double y, double x) __attribute__((const)); // atan2() in math.h
+double emscripten_math_atanh(double x) __attribute__((const)); // atanh() in math.h
+double emscripten_math_cbrt(double x) __attribute__((const)); // cbrt() in math.h
+double emscripten_math_cos(double x) __attribute__((const)); // cos() in math.h
+double emscripten_math_cosh(double x) __attribute__((const)); // cosh() in math.h
+double emscripten_math_exp(double x) __attribute__((const)); // exp() in math.h
+double emscripten_math_expm1(double x) __attribute__((const)); // expm1() in math.h
+double emscripten_math_fmod(double x, double y) __attribute__((const)); // fmod() in math.h, not a function on Math, but calls JS "x % y" operator.
+double emscripten_math_hypot(int count, ...) __attribute__((const));  // hypot() in math.h (although only for fixed 2 arguments)
+double emscripten_math_log(double x) __attribute__((const)); // log() in math.h
+double emscripten_math_log1p(double x) __attribute__((const)); // log1p() in math.h
+double emscripten_math_log10(double x) __attribute__((const)); // log10() in math.h
+double emscripten_math_log2(double x) __attribute__((const)); // log2() in math.h
+double emscripten_math_pow(double x, double y) __attribute__((const)); // pow(x, y) in math.h
+double emscripten_math_random(void); // N.b. The difference between this function and emscripten_random() in emscripten.h is that it returns a single-precision float!
+double emscripten_math_round(double x) __attribute__((const)); // round() in math.h
+double emscripten_math_sign(double x) __attribute__((const)); // No equivalent in libc
+double emscripten_math_sin(double x) __attribute__((const)); // sin() in math.h
+double emscripten_math_sinh(double x) __attribute__((const)); // sinh() in math.h
+double emscripten_math_sqrt(double x) __attribute__((const)); // sqrt() in math.h
+double emscripten_math_tan(double x) __attribute__((const)); // tan() in math.h
+double emscripten_math_tanh(double x) __attribute__((const)); // tanh() in math.h
 
 #ifdef __cplusplus
 }

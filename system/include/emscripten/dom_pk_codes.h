@@ -179,10 +179,10 @@
 extern "C" {
 #endif
 /* Maps the EmscriptenKeyboardEvent::code field from emscripten/html5.h to one of the DOM_PK codes above. */
-DOM_PK_CODE_TYPE emscripten_compute_dom_pk_code(const char *keyCodeString);
+DOM_PK_CODE_TYPE emscripten_compute_dom_pk_code(const char *keyCodeString) __attribute__((pure));
 
 /* Returns the string representation of the given key code ID. Useful for debug printing. */
-const char *emscripten_dom_pk_code_to_string(DOM_PK_CODE_TYPE code);
+const char *emscripten_dom_pk_code_to_string(DOM_PK_CODE_TYPE code) __attribute__((const));
 #ifdef __cplusplus
 }
 #endif

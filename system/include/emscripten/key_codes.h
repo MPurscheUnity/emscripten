@@ -204,7 +204,7 @@
 extern "C" {
 #endif
 
-const char *emscripten_dom_vk_to_string(int dom_vk_code);
+const char *emscripten_dom_vk_to_string(int dom_vk_code) __attribute__((const));
 
 #ifdef __cplusplus
 } // ~extern "C"

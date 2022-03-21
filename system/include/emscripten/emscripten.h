@@ -74,7 +74,7 @@ void emscripten_async_call(em_arg_callback_func func, void *arg, int millis);
 void emscripten_exit_with_live_runtime(void) __attribute__((noreturn));
 void emscripten_force_exit(int status) __attribute__((noreturn));
 
-double emscripten_get_device_pixel_ratio(void);
+double emscripten_get_device_pixel_ratio(void) __attribute__((pure));
 
 char *emscripten_get_window_title();
 void emscripten_set_window_title(const char *);
@@ -136,8 +136,8 @@ int emscripten_get_worker_queue_size(worker_handle worker);
 
 // misc.
 
-int emscripten_get_compiler_setting(const char *name);
-int emscripten_has_asyncify(void);
+int emscripten_get_compiler_setting(const char *name) __attribute__((const));
+int emscripten_has_asyncify(void) __attribute__((const));
 
 void emscripten_debugger(void);
 

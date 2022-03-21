@@ -18,14 +18,14 @@ extern "C" {
 
 // Returns the starting address of the wasm stack. This is the address
 // that the stack pointer would point to when no bytes are in use on the stack.
-uintptr_t emscripten_stack_get_base(void);
+uintptr_t emscripten_stack_get_base(void) __attribute__((pure));
 
 // Returns the end address of the wasm stack. This is the address that the stack
 // pointer would point to when the whole stack is in use.  (the address pointed
 // to by the end is not part of the stack itself). Note that the stack grows
 // down so the address returned by emscripten_stack_get_end() is smaller than
 // emscripten_stack_get_base().
-uintptr_t emscripten_stack_get_end(void);
+uintptr_t emscripten_stack_get_end(void) __attribute__((pure));
 
 // Setup internal base/end values based on the initial values that were either
 // set at compile time (in static linking) or instantiations time (for dynamic

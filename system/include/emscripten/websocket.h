@@ -100,7 +100,7 @@ typedef struct EmscriptenWebSocketCreateAttributes {
 #define emscripten_websocket_init_create_attributes(attributes) do { memset((attributes), 0, sizeof(EmscriptenWebSocketCreateAttributes)); } while(0)
 
 // Returns true if WebSockets are supported by the current browser
-EM_BOOL emscripten_websocket_is_supported(void);
+EM_BOOL emscripten_websocket_is_supported(void) __attribute__((const));
 
 // Creates a new WebSocket and connects it to the given remote host.
 // If the return value of this function is > 0, the function has succeeded and the return value represents a handle to the WebSocket object.
