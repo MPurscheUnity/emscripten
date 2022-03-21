@@ -40,7 +40,8 @@ int emscripten_futex_wait(volatile void/*uint32_t*/ *addr __attribute__((nonnull
 
 // Wakes the given number of threads waiting on a location. Pass count ==
 // INT_MAX to wake all waiters on that location.
-int emscripten_futex_wake(volatile void/*uint32_t*/ *addr __attribute__((nonnull)), int count);
+// Returns -EINVAL if addr is null.
+int emscripten_futex_wake(volatile void/*uint32_t*/ *addr, int count);
 
 // Proxied JS function can support a few more arguments than proxied C/C++
 // functions, because the dispatch is variadic and signature independent.
