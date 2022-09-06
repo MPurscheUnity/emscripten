@@ -789,7 +789,7 @@ def closure_transpile(filename, pretty):
 
 
 @ToolchainProfiler.profile()
-def closure_compiler(filename, pretty, advanced=True, extra_closure_args=None):
+def closure_compiler(filename, pretty, advanced=True, extra_closure_args=None, emit_symbol_map=False):
   user_args = []
   env_args = os.environ.get('EMCC_CLOSURE_ARGS')
   if env_args:
@@ -856,6 +856,10 @@ def closure_compiler(filename, pretty, advanced=True, extra_closure_args=None):
     args += ['--language_out', 'NO_TRANSPILE']
   # Tell closure never to inject the 'use strict' directive.
   args += ['--emit_use_strict=false']
+
+  if emit_symbol_map:
+    source_map = replace_suffix(outfile, '.closure_source_map')
+    args += ['--create_source_map', source_map]
 
   if settings.IGNORE_CLOSURE_COMPILER_ERRORS:
     args.append('--jscomp_off=*')
@@ -954,6 +958,13 @@ def run_closure_cmd(cmd, filename, env, pretty):
 
     if settings.CLOSURE_WARNINGS == 'error':
       exit_with_error('closure compiler produced warnings and -sCLOSURE_WARNINGS=error enabled')
+
+    # Convert the source map to a symbol map if we are generating symbol maps.
+    if emit_symbol_map:
+      symbol_map_data = subprocess.check_output(NODE_JS + [path_from_root('tools', 'size_report.js'), '--createSymbolMapFromSourceMap', source_map, outfile])
+      try_delete(source_map)
+      symbol_map = replace_suffix(outfile, '.closure_symbol_map')
+      open(symbol_map, 'wb').write(symbol_map_data)
 
   return outfile
 

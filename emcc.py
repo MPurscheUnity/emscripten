@@ -3522,7 +3522,8 @@ def phase_binaryen(target, options, wasm_target):
   if final_js and (options.use_closure_compiler or settings.TRANSPILE_TO_ES5):
     if options.use_closure_compiler:
       final_js = building.closure_compiler(final_js, pretty=not minify_whitespace(),
-                                           extra_closure_args=options.closure_args)
+                                           extra_closure_args=options.closure_args,
+                                           emit_symbol_map=options.emit_symbol_map)
     else:
       final_js = building.closure_transpile(final_js, pretty=not minify_whitespace())
     save_intermediate_with_wasm('closure', wasm_target)
@@ -3530,6 +3531,7 @@ def phase_binaryen(target, options, wasm_target):
   symbols_file = None
   if options.emit_symbol_map:
     symbols_file = shared.replace_or_append_suffix(target, '.symbols')
+    closure_symbols_file = shared.replace_suffix(final, '.closure_symbol_map')
 
   if settings.WASM2JS:
     symbols_file_js = None
@@ -3580,6 +3582,12 @@ def phase_binaryen(target, options, wasm_target):
 
   if settings.WASM2C:
     wasm2c.do_wasm2c(wasm_target)
+
+  # Merge Wasm .symbols file with Closure JS .symbols file
+  if options.use_closure_compiler and options.emit_symbol_map:
+    closure_symbols = open(closure_symbols_file, 'r').read()
+    open(symbols_file, 'a').write(closure_symbols)
+    shared.try_delete(closure_symbols_file)
 
   # we have finished emitting the wasm, and so intermediate debug info will
   # definitely no longer be used tracking it.
