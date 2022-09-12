@@ -2815,6 +2815,10 @@ def phase_compile_inputs(options, state, newargs, input_files):
     if not state.has_dash_c:
       cmd += ['-c']
     cmd += ['-o', output_file]
+
+    # XXX hardcoded for now: TODO place behind a build option
+    cmd += ['-mllvm', '--emit-symbol-graph-json=' + output_file + '.callgraph.json']
+
     if state.mode == Mode.COMPILE_AND_LINK and '-gsplit-dwarf' in newargs:
       # When running in COMPILE_AND_LINK mode we compile to temporary location
       # but we want the `.dwo` file to be generated in the current working directory,
@@ -2882,6 +2886,15 @@ def phase_link(linker_arguments, wasm_target):
   if settings.LLD_REPORT_UNDEFINED and settings.ERROR_ON_UNDEFINED_SYMBOLS and not settings.SIDE_MODULE:
     js_syms = get_all_js_syms()
   building.link_lld(linker_arguments, wasm_target, external_symbols=js_syms)
+
+  # Collect all partial call graph files, and generate a single merged output call graph file
+  cg = []
+  for arg in linker_arguments:
+    f = arg + '.callgraph.json'
+    if os.path.isfile(f):
+      cg += [f]
+  if len(cg) > 0:
+    building.merge_call_graph_jsons(wasm_target + '.callgraph.json', cg)
 
 
 @ToolchainProfiler.profile_block('post_link')

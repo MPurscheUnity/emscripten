@@ -1440,6 +1440,12 @@ def map_and_apply_to_settings(library_name):
   return False
 
 
+def merge_call_graph_jsons(output, inputs):
+  cmd = [sys.executable, '-E', path_from_root('tools/merge-callgraph-json.py'),
+         '-o',  output] + inputs
+  check_call(cmd)
+
+
 def emit_wasm_source_map(wasm_file, map_file, final_wasm):
   # source file paths must be relative to the location of the map (which is
   # emitted alongside the wasm)
