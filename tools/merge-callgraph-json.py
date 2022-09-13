@@ -81,7 +81,7 @@ if wasm_output_name:
       wasm_module_function_sizes[fname] = fsize
 
 
-# Find all imports, exports and unexpected roots (functions that are not called by any other function, these are likely referenced via a function pointer)
+# Find all imports and exports
 cur_script_dir = os.path.dirname(os.path.realpath(__file__))
 cmd = ['node', os.path.join(cur_script_dir, 'size_report', 'size_report.js'), '--json', wasm_output_name]
 print(' '.join(cmd))
@@ -192,9 +192,26 @@ def dict_to_linear_array(d):
     arr[d[key]] = key
   return arr
 
+function_names_array = dict_to_linear_array(function_names)
+filenames_array = dict_to_linear_array(filenames)
+
+# Find all unexpected roots (functions that are not called by any other function, these are likely referenced via a function pointer)
+called_functions = set()
+for f in functions:
+  if 'c' in f:
+    for c in f['c']:
+      called_functions.add(c['n'])
+
+for f in functions:
+  if f['n'] not in called_functions and 'export' not in f:
+    f['r'] = 1
+    print('Function "' + function_names_array[f['n']] + '" from file ' + (filenames_array[f['f']] if 'f' in f else 'UNKNOWN') + ' is an unexpected ROOT')
+
+
+
 output_json = {
-  'functionNames': dict_to_linear_array(function_names),
-  'filenames': dict_to_linear_array(filenames),
+  'functionNames': function_names_array,
+  'filenames': filenames_array,
   'functions': functions
 }
 
