@@ -95,6 +95,13 @@ function initRuntime(asm) {
   <<< ATINITS >>>
 }
 
+// XXX Always run code coverage for now
+
+#include "coverage.js"
+
+// Install the code coverage execution handler.
+asmLibraryArg['log_execution'] = COV_log_execution;
+
 // Initialize wasm (asynchronous)
 
 var imports = {

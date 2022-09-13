@@ -828,9 +828,16 @@ function resetPrototype(constructor, attrs) {
 }
 #endif
 
+// XXX Always run code coverage for now!
+#include "coverage.js"
+
 // Create the wasm instance.
 // Receives the wasm imports, returns the exports.
 function createWasm() {
+
+  // Install the code coverage execution handler.
+  asmLibraryArg['log_execution'] = COV_log_execution;
+
   // prepare imports
   var info = {
 #if MINIFY_WASM_IMPORTED_MODULES

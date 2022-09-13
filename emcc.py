@@ -554,6 +554,10 @@ def get_binaryen_passes():
   # hardcoded value in the binaryen pass)
   if optimizing and settings.GLOBAL_BASE >= 1024:
     passes += ['--low-memory-unused']
+
+  # XXXX Always run code coverage for now
+  passes += ['--log-execution']
+
   if settings.AUTODEBUG:
     # adding '--flatten' here may make these even more effective
     passes += ['--instrument-locals']

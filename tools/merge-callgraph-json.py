@@ -70,6 +70,9 @@ wasm_output_name = extract_arg('--wasm')
 
 wasm_module_function_sizes = None
 
+export_names = set()
+import_names = set()
+
 if wasm_output_name:
   wasm_module_function_sizes = {}
   wasm_fnames = subprocess.check_output(["wasm-opt", "--nm", wasm_output_name]).decode('utf-8')
@@ -81,23 +84,21 @@ if wasm_output_name:
       wasm_module_function_sizes[fname] = fsize
 
 
-# Find all imports and exports
-cur_script_dir = os.path.dirname(os.path.realpath(__file__))
-cmd = ['node', os.path.join(cur_script_dir, 'size_report', 'size_report.js'), '--json', wasm_output_name]
-print(' '.join(cmd))
-size_report_json = subprocess.check_output(cmd).decode('utf-8')
-print(str(size_report_json))
-size_report_json = json.loads(size_report_json)
+  # Find all imports and exports
+  cur_script_dir = os.path.dirname(os.path.realpath(__file__))
+  cmd = ['node', os.path.join(cur_script_dir, 'size_report', 'size_report.js'), '--json', wasm_output_name]
+  print(' '.join(cmd))
+  size_report_json = subprocess.check_output(cmd).decode('utf-8')
+  print(str(size_report_json))
+  size_report_json = json.loads(size_report_json)
 
-export_names = set()
-import_names = set()
-for e in size_report_json:
-  if e['type'] == 'import': import_names.add(e['name'])
-  if e['type'] == 'export': export_names.add(e['name'])
+  for e in size_report_json:
+    if e['type'] == 'import': import_names.add(e['name'])
+    if e['type'] == 'export': export_names.add(e['name'])
 
-print('IMPORTS: ' + str(import_names))
-print('EXPORTS: ' + str(export_names))
-print('IMPLEMENTED FUNCTIONS: ' + str(wasm_module_function_sizes))
+  print('IMPORTS: ' + str(import_names))
+  print('EXPORTS: ' + str(export_names))
+  print('IMPLEMENTED FUNCTIONS: ' + str(wasm_module_function_sizes))
 
 print('Merging ' + str(len(args)) + ' call graphs into one output: ' + out_json_filename)
 
@@ -207,8 +208,6 @@ for f in functions:
     f['r'] = 1
     if 'export' not in f:
       print('Function "' + function_names_array[f['n']] + '" from file ' + (filenames_array[f['f']] if 'f' in f else 'UNKNOWN') + ' is an unexpected ROOT')
-
-
 
 output_json = {
   'functionNames': function_names_array,
