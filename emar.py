@@ -17,7 +17,7 @@ args = substitute_response_files(sys.argv)
 input_files = []
 output_file = None
 for i in range(1, len(args)):
-  if len(args[i]) >= 1 and len(args[i]) <= 2 and args[i].isalpha():
+  if len(args[i]) >= 1 and len(args[i]) <= 3 and args[i].isalpha():
     input_files = args[i+2:]
     output_file = args[i+1]
     break
