@@ -75,9 +75,9 @@ if wasm_output_name:
   wasm_fnames = subprocess.check_output(["wasm-opt", "--nm", wasm_output_name]).decode('utf-8')
   for line in wasm_fnames.split('\n'):
     if ':' in line:
-      fname, fsize = line.split(':')
-      fname = fname.strip()
-      fsize = int(fsize.strip())
+      idx = line.rfind(':')
+      fname = line[:idx].strip()
+      fsize = int(line[idx+1:].strip())
 #      print(str(fname))
 #      print(str(fsize))
       wasm_module_function_sizes[fname] = fsize
@@ -118,9 +118,12 @@ for g in graphs:
   for f in g['functions']:
 #    print(str(f))
     name = g_function_names[f['n']]
-    if wasm_module_function_sizes is not None and name not in wasm_module_function_sizes:
-      continue
-    size = wasm_module_function_sizes[name]
+    size = None
+    if wasm_module_function_sizes is not None:
+      if name not in wasm_module_function_sizes:
+        continue
+      size = wasm_module_function_sizes[name]
+
     name_number = record_function_name(name)
     filename = g_filenames[f['f']] if 'f' in f else None
     filename_number = record_filename(filename) if filename else 0
@@ -145,9 +148,9 @@ for g in graphs:
         callees += [callee]
 
     function = {
-      'n': name_number,
-      's': size
+      'n': name_number
     }
+    if size: function['s'] = size
     if filename_number: function['f'] = filename_number
     if line_number: function['l'] = line_number
 

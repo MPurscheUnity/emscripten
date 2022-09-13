@@ -2906,13 +2906,13 @@ def phase_link(linker_arguments, wasm_target):
   # Collect all partial call graph files, and generate a single merged output call graph file
   cg = []
   for arg in linker_arguments:
-    if arg.startswith('-L'):
-      continue
     f = None
     if arg.startswith('-l'):
       lib = find_lib(arg[2:])
       if lib:
         f = lib + '.callgraph.json'
+    if arg.startswith('-'):
+      continue
     if not f:
       f = arg + '.callgraph.json'
     if os.path.isfile(f):

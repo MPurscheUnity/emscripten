@@ -372,6 +372,8 @@ def link_lld(args, target, external_symbols=None):
   if settings.STRICT:
     args.append('--fatal-warnings')
 
+  args.append('--no-demangle')
+
   cmd = [WASM_LD, '-o', target] + args
   for a in llvm_backend_args():
     cmd += ['-mllvm', a]
