@@ -203,9 +203,10 @@ for f in functions:
       called_functions.add(c['n'])
 
 for f in functions:
-  if f['n'] not in called_functions and 'export' not in f:
+  if f['n'] not in called_functions:
     f['r'] = 1
-    print('Function "' + function_names_array[f['n']] + '" from file ' + (filenames_array[f['f']] if 'f' in f else 'UNKNOWN') + ' is an unexpected ROOT')
+    if 'export' not in f:
+      print('Function "' + function_names_array[f['n']] + '" from file ' + (filenames_array[f['f']] if 'f' in f else 'UNKNOWN') + ' is an unexpected ROOT')
 
 
 
