@@ -78,16 +78,32 @@ if wasm_output_name:
       idx = line.rfind(':')
       fname = line[:idx].strip()
       fsize = int(line[idx+1:].strip())
-#      print(str(fname))
-#      print(str(fsize))
       wasm_module_function_sizes[fname] = fsize
-  #print(str(wasm_fnames))
-#  sys.exit(1)
+
+
+# Find all imports, exports and unexpected roots (functions that are not called by any other function, these are likely referenced via a function pointer)
+cur_script_dir = os.path.dirname(os.path.realpath(__file__))
+cmd = ['node', os.path.join(cur_script_dir, 'size_report', 'size_report.js'), '--json', wasm_output_name]
+print(' '.join(cmd))
+size_report_json = subprocess.check_output(cmd).decode('utf-8')
+print(str(size_report_json))
+size_report_json = json.loads(size_report_json)
+
+export_names = set()
+import_names = set()
+for e in size_report_json:
+  if e['type'] == 'import': import_names.add(e['name'])
+  if e['type'] == 'export': export_names.add(e['name'])
+
+print('IMPORTS: ' + str(import_names))
+print('EXPORTS: ' + str(export_names))
+print('IMPLEMENTED FUNCTIONS: ' + str(wasm_module_function_sizes))
 
 print('Merging ' + str(len(args)) + ' call graphs into one output: ' + out_json_filename)
 
 graphs = []
 for i in args:
+  print('Loading input callgraph JSON ' + i)
   graphs += [json.load(open(i))]
 
 filenames = {'': 0}
@@ -118,6 +134,10 @@ for g in graphs:
   for f in g['functions']:
 #    print(str(f))
     name = g_function_names[f['n']]
+    # Special name demangling that Binaryen pass does for 'main':
+    if name == '__main_argc_argv':
+      name = 'main'
+
     size = None
     if wasm_module_function_sizes is not None:
       if name not in wasm_module_function_sizes:
@@ -150,6 +170,13 @@ for g in graphs:
     function = {
       'n': name_number
     }
+    if name in import_names:
+      print(name + ' IS AN IMPORT')
+      function['import'] = 1
+
+    if name in export_names:
+      print(name + ' IS AN EXPORT')
+      function['export'] = 1
     if size: function['s'] = size
     if filename_number: function['f'] = filename_number
     if line_number: function['l'] = line_number
@@ -170,5 +197,16 @@ output_json = {
   'filenames': dict_to_linear_array(filenames),
   'functions': functions
 }
+
+def is_function_implemented(funcname):
+  for f in output_json['functions']:
+    if output_json['functionNames'][f['n']] == funcname:
+      return True
+
+# Do a double check that we got everything
+if wasm_module_function_sizes is not None:
+  for key in wasm_module_function_sizes:
+    if not is_function_implemented(key):
+      print('WARNING: Function ' + key + ' that is present in the .wasm file somehow did not make its way to the callgraph JSON!')
 
 open(out_json_filename, 'w').write(json.dumps(output_json))

@@ -2911,7 +2911,7 @@ def phase_link(linker_arguments, wasm_target):
       lib = find_lib(arg[2:])
       if lib:
         f = lib + '.callgraph.json'
-    if arg.startswith('-'):
+    elif arg.startswith('-'):
       continue
     if not f:
       f = arg + '.callgraph.json'
