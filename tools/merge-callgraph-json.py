@@ -68,15 +68,19 @@ def extract_arg(optname):
 out_json_filename = extract_arg('-o')
 wasm_output_name = extract_arg('--wasm')
 
-wasm_module_function_names = None
+wasm_module_function_sizes = None
+
 if wasm_output_name:
-  wasm_module_function_names = []
+  wasm_module_function_sizes = {}
   wasm_fnames = subprocess.check_output(["wasm-opt", "--nm", wasm_output_name]).decode('utf-8')
   for line in wasm_fnames.split('\n'):
     if ':' in line:
-      fname = line.split(':')[0].strip()
+      fname, fsize = line.split(':')
+      fname = fname.strip()
+      fsize = int(fsize.strip())
 #      print(str(fname))
-      wasm_module_function_names += [fname]
+#      print(str(fsize))
+      wasm_module_function_sizes[fname] = fsize
   #print(str(wasm_fnames))
 #  sys.exit(1)
 
@@ -114,8 +118,9 @@ for g in graphs:
   for f in g['functions']:
 #    print(str(f))
     name = g_function_names[f['n']]
-    if wasm_module_function_names is not None and name not in wasm_module_function_names:
+    if wasm_module_function_sizes is not None and name not in wasm_module_function_sizes:
       continue
+    size = wasm_module_function_sizes[name]
     name_number = record_function_name(name)
     filename = g_filenames[f['f']] if 'f' in f else None
     filename_number = record_filename(filename) if filename else 0
@@ -140,7 +145,8 @@ for g in graphs:
         callees += [callee]
 
     function = {
-      'n': name_number
+      'n': name_number,
+      's': size
     }
     if filename_number: function['f'] = filename_number
     if line_number: function['l'] = line_number
