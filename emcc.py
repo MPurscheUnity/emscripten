@@ -2817,6 +2817,7 @@ def phase_compile_inputs(options, state, newargs, input_files):
     cmd += ['-o', output_file]
 
     # XXX hardcoded for now: TODO place behind a build option
+    print('Asking generation of callgraph to ' + output_file + '.callgraph.json')
     cmd += ['-mllvm', '--emit-symbol-graph-json=' + output_file + '.callgraph.json']
 
     if state.mode == Mode.COMPILE_AND_LINK and '-gsplit-dwarf' in newargs:
@@ -2887,14 +2888,40 @@ def phase_link(linker_arguments, wasm_target):
     js_syms = get_all_js_syms()
   building.link_lld(linker_arguments, wasm_target, external_symbols=js_syms)
 
+  def get_link_directories(args):
+    link_dirs = []
+    for f in args:
+      if f.startswith('-L'):
+        link_dirs += [f[2:]]
+    return link_dirs
+
+  link_dirs = get_link_directories(linker_arguments)
+
+  def find_lib(lib):
+    for d in link_dirs:
+      c = os.path.join(d, 'lib' + lib + '.a')
+      if os.path.isfile(c):
+        return c
+
   # Collect all partial call graph files, and generate a single merged output call graph file
   cg = []
   for arg in linker_arguments:
-    f = arg + '.callgraph.json'
+    if arg.startswith('-L'):
+      continue
+    f = None
+    if arg.startswith('-l'):
+      lib = find_lib(arg[2:])
+      if lib:
+        f = lib + '.callgraph.json'
+    if not f:
+      f = arg + '.callgraph.json'
     if os.path.isfile(f):
       cg += [f]
+      print('Found call graph file ' + f)
+    else:
+      print('Was unable to find call graph file ' + f)
   if len(cg) > 0:
-    building.merge_call_graph_jsons(wasm_target + '.callgraph.json', cg)
+    building.merge_call_graph_jsons(wasm_target + '.callgraph.json', cg, wasm_target)
 
 
 @ToolchainProfiler.profile_block('post_link')
