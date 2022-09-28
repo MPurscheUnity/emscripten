@@ -56,12 +56,16 @@ cov = open(cov_filename, 'rb').read()
 
 for fn in cg['functions']:
   fname = cg['functionNames'][fn['n']]
-  ordinal = ordinals[fname]
-  called = (cov[ordinal >> 3] & (1 << (ordinal & 7))) != 0
-  call = ' CALLED' if called else ''
-  print(str(fname) + ' -> ' + str(ordinals[fname]) + call)
-  if called:
-    fn['x'] = 1
+  if fname in ordinals:
+    ordinal = ordinals[fname]
+    called = (cov[ordinal >> 3] & (1 << (ordinal & 7))) != 0
+    call = ' CALLED' if called else ''
+    print(str(fname) + ' -> ' + str(ordinals[fname]) + call)
+    if called:
+      fn['x'] = 1
+    print('Function ' + fname + ' was called!')
+  else:
+    print('WARNING: Ordinal for function ' + fname + ' was not found!')
 
 open(output_filename, 'w').write(json.dumps(cg))
 print('Wrote output file ' + output_filename)
