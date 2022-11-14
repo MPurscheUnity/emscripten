@@ -3317,6 +3317,11 @@ mergeInto(LibraryManager.library, {
   $getWasmTableEntry__internal: true,
   $getWasmTableEntry__deps: ['$wasmTableMirror'],
   $getWasmTableEntry: function(funcPtr) {
+#if MEMORY64
+    // Function pointers are 64-bit, but wasmTable.get() requires a Number.
+    // https://github.com/emscripten-core/emscripten/issues/18200
+    funcPtr = Number(funcPtr);
+#endif
     var func = wasmTableMirror[funcPtr];
     if (!func) {
       if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1;
@@ -3337,7 +3342,13 @@ mergeInto(LibraryManager.library, {
   $getWasmTableEntry: function(funcPtr) {
     // In -Os and -Oz builds, do not implement a JS side wasm table mirror for small
     // code size, but directly access wasmTable, which is a bit slower as uncached.
+#if MEMORY64
+    // Function pointers are 64-bit, but wasmTable.get() requires a Number.
+    // https://github.com/emscripten-core/emscripten/issues/18200
+    return wasmTable.get(Number(funcPtr));
+#else
     return wasmTable.get(funcPtr);
+#endif
   },
 #endif // SHRINK_LEVEL == 0
 
