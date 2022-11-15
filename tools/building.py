@@ -1443,7 +1443,7 @@ def map_and_apply_to_settings(library_name):
 
 
 def merge_call_graph_jsons(output, inputs, wasm_output_file=None):
-  cmd = [sys.executable, '-E', path_from_root('tools/merge-callgraph-json.py'),
+  cmd = [sys.executable, '-E', path_from_root('merge-callgraph-json.py'),
          '-o',  output]
   if wasm_output_file:
     cmd += ['--wasm', wasm_output_file]

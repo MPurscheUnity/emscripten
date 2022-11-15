@@ -1,4 +1,6 @@
 import json, os, sys, subprocess, shlex
+from tools import config
+
 
 def read_response_file(response_filename):
   """Reads a response file, and returns the list of cmdline params found in the
@@ -75,7 +77,8 @@ import_names = set()
 
 if wasm_output_name:
   wasm_module_function_sizes = {}
-  wasm_fnames = subprocess.check_output(["wasm-opt", "--nm", wasm_output_name]).decode('utf-8')
+  wasm_opt = os.path.join(config.BINARYEN_ROOT, 'bin', 'wasm-opt')
+  wasm_fnames = subprocess.check_output([wasm_opt, "--nm", wasm_output_name]).decode('utf-8')
   for line in wasm_fnames.split('\n'):
     if ':' in line:
       idx = line.rfind(':')
@@ -86,7 +89,7 @@ if wasm_output_name:
 
   # Find all imports and exports
   cur_script_dir = os.path.dirname(os.path.realpath(__file__))
-  cmd = ['node', os.path.join(cur_script_dir, 'size_report', 'size_report.js'), '--json', wasm_output_name]
+  cmd = config.NODE_JS + [os.path.join(cur_script_dir, 'size_report', 'size_report.js'), '--json', wasm_output_name]
   print(' '.join(cmd))
   size_report_json = subprocess.check_output(cmd).decode('utf-8')
   print(str(size_report_json))
