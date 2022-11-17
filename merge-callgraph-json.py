@@ -89,7 +89,7 @@ if wasm_output_name:
 
   # Find all imports and exports
   cur_script_dir = os.path.dirname(os.path.realpath(__file__))
-  cmd = config.NODE_JS + [os.path.join(cur_script_dir, 'size_report', 'size_report.js'), '--json', wasm_output_name]
+  cmd = config.NODE_JS + [os.path.join(cur_script_dir, 'tools', 'size_report', 'size_report.js'), '--json', wasm_output_name]
   print(' '.join(cmd))
   size_report_json = subprocess.check_output(cmd).decode('utf-8')
   print(str(size_report_json))
