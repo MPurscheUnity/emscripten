@@ -556,8 +556,9 @@ def get_binaryen_passes():
   if optimizing and settings.GLOBAL_BASE >= 1024:
     passes += ['--low-memory-unused']
 
-  # XXXX Always run code coverage for now
-  passes += ['--log-execution']
+  if settings.EMIT_SYMBOL_GRAPH_JSON:
+    # Enable code coverage if symbol graph is emitted
+    passes += ['--log-execution']
 
   if settings.AUTODEBUG:
     # adding '--flatten' here may make these even more effective
